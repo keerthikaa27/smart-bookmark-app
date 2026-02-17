@@ -6,7 +6,7 @@ A full-stack bookmark manager built with Next.js, Supabase, and Tailwind CSS. Us
 
 ## Live Demo
 
-[View the deployed application on Vercel](https://your-vercel-url.vercel.app)
+[View the deployed application on Vercel](https://smart-bookmark-app-nine-beige.vercel.app/)
 
 ---
 
