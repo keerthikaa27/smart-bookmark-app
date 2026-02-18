@@ -29,6 +29,7 @@ export default function Dashboard() {
     const { data } = await supabase
       .from("bookmarks")
       .select("*")
+      .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
 
     setBookmarks(data || []);
@@ -55,40 +56,47 @@ export default function Dashboard() {
     };
   }, []);
 
-  // ➕ Add bookmark
+  // Add bookmark
   const addBookmark = async () => {
-    if (!url || !title) {
-      alert("Please enter both title and URL");
-      return;
-    }
+  if (!url || !title) {
+    alert("Please enter both title and URL");
+    return;
+  }
 
-    // Simple validation
-    if (!url.startsWith("http")) {
-      alert("URL must start with http or https");
-      return;
-    }
+  if (!url.startsWith("http")) {
+    alert("URL must start with http or https");
+    return;
+  }
 
-    setAdding(true);
+  setAdding(true);
 
-    const { data } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
 
-    await supabase.from("bookmarks").insert([
+  const { data: newBookmark } = await supabase
+    .from("bookmarks")
+    .insert([
       {
         url,
         title,
-        user_id: data.user?.id,
+        user_id: userData.user?.id,
       },
-    ]);
+    ])
+    .select()  // to get the inserted bookmark back
+    .single(); // Get just the one bookmark
 
-    setUrl("");
-    setTitle("");
-    setAdding(false);
+  // Manually add to local state immediately
+  if (newBookmark) {
+    setBookmarks([newBookmark, ...bookmarks]);
+  }
 
-    // Show toast
-    setToast(true);
-    setTimeout(() => setToast(false), 2500);
-  };
+  setUrl("");
+  setTitle("");
+  setAdding(false);
 
+  // Show toast
+  setToast(true);
+  setTimeout(() => setToast(false), 2500);
+};
   // Delete bookmark
   const deleteBookmark = async (id: string) => {
     await supabase.from("bookmarks").delete().eq("id", id);
